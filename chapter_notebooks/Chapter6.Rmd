@@ -25,14 +25,15 @@ API
 * getters
 * setters
 
-Since a node is a very simple object, I will only provide code for the definition for now. To start I give a node only one attribute, which is its name.
+I've defined a node class, which only has one slot corresponding to its name.
 ```{r define node}
-
+getClass("Node")
 ```
 
+With this class, I can perform some tests.
 ```{r test Node}
 # Creating a test node
-test_node <- new("Node")
+test_node <- Node()
 
 # Testing the getter
 name(test_node)
@@ -45,15 +46,15 @@ name(test_node)
 Next, I define an edge, which has two attributes: a source node, and a target node. Because this item is slightly more complicated, I also define a setter to create a new edge from two provided nodes.
 
 ```{r define edge}
-
+getClass("Edge")
 ```
 
 ```{r test Edge}
 # Creating two test nodes
-node1 <- new("Node", name = "node1")
-node2 <- new("Node", name = "node2")
-node3 <- new("Node", name = "node3")
-node4 <- new("Node", name = "node4")
+node1 <- Node("node1")
+node2 <- Node("node2")
+node3 <- Node("node3")
+node4 <- Node("node4")
 
 # Creating some test edges
 edge1 <- new("Edge", source_node = node1, target_node = node2)
@@ -79,17 +80,23 @@ all.equal(edge1, edge3)
 
 
 ```{r define network}
+getClass("SimpleNetwork")
+```
 
+```{r create SimpleNetwork}
+test_network <- new("SimpleNetwork", node_list = list(node1, node2, node3, node4), edge_list = list(edge1, edge3))
+```
+
+```{r test Bad Network}
+# Testing validator function
+bad_network <- new("SimpleNetwork", node_list = list(node1, node2, "bad_node", node4), edge_list = list(edge1, "bad_edge"))
 ```
 
 ```{r test SimpleNetwork}
-test_network <- new("SimpleNetwork", node_list = list(node1, node2, node3, node4), edge_list = list(edge1, edge3))
-
 node5 <- new("Node", name = "node5")
 test_network <- add_node(test_network, node5)
 
-# Testing validator function
-bad_network <- new("SimpleNetwork", node_list = list(node1, node2, "bad_node", node4), edge_list = list(edge1, "bad_edge"))
+
 
 # Testing edge add and delete
 node99 <- new("Node", name = "node99")

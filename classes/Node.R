@@ -4,9 +4,14 @@ Node <- setClass("Node",
                    name = "character"
                  ),
                  prototype(
-                   name = "default_node_name"
+                   name = NA_character_
                  )
 )
+
+#### Constructor ####
+Node <- function(name = NA_character_) {
+  new("Node", name = name)
+}
 
 #### Generics ####
 setGeneric("name", function(x) standardGeneric("name"))
