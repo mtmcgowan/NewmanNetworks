@@ -1,0 +1,157 @@
+---
+title: "Chapter 6: Mathematics of Networks"
+output: html_notebook
+---
+
+# 6.1: Networks and their representations
+
+This chapter starts with a basic definition of a network or graph as a collection of *nodes*, which are joined together by *edges*.
+
+Using this simple definition, I start off by defining S4 classes for each of these items.
+
+, here are the items that should be implemented for a new class definition:
+
+Core
+* definition
+* validity method
+* constructor function
+* "show" method
+
+API
+* getters
+* setters
+
+Since a node is a very simple object, I will only provide code for the definition for now. To start I give a node only one attribute, which is its name.
+```{r define node}
+# Definition
+Node <- setClass("Node",
+                 representation(
+                     name = "character"
+                     ),
+                 prototype(
+                   name = "default_node_name"
+                   )
+                 )
+
+# Generics
+setGeneric("name", function(x) standardGeneric("name"))
+setGeneric("name<-", function(x, value) standardGeneric("name<-"))
+
+# Getters
+setMethod("name", "Node", function(x) x@name)
+
+# Setters
+setMethod("name<-", "Node", function(x, value) {
+  x@name <- value
+  x
+})
+```
+
+```{r test Node}
+# Creating a test node
+test_node <- new("Node")
+
+# Testing the getter
+name(test_node)
+
+# Testing the setter
+name(test_node) <- "node1"
+name(test_node)
+```
+
+Next, I define an edge, which has two attributes: a source node, and a target node. Because this item is slightly more complicated, I also define a setter to create a new edge from two provided nodes.
+
+```{r define edge}
+Edge <- setClass("Edge",
+                 representation(
+                   source_node = "Node",
+                   target_node = "Node"
+                 ))
+
+# Generics
+setGeneric("source_node", function(x) standardGeneric("source_node"))
+setGeneric("source_node<-", function(x, value) standardGeneric("source_node<-"))
+
+setGeneric("target_node", function(x) standardGeneric("target_node"))
+setGeneric("target_node<-", function(x, value) standardGeneric("target_node<-"))
+
+# Getters
+setMethod("source_node", "Edge", function(x) x@source_node)
+setMethod("target_node", "Edge", function(x) x@target_node)
+
+# Setters
+setMethod("source_node<-", "Edge", function(x, value) {
+  x@source_node <- value
+  x
+})
+setMethod("target_node<-", "Edge", function(x, value) {
+  x@target_node <- value
+  x
+})
+```
+
+```{r test Edge}
+# Creating two test nodes
+node1 <- new("Node", name = "node1")
+node2 <- new("Node", name = "node2")
+node3 <- new("Node", name = "node3")
+node4 <- new("Node", name = "node4")
+
+# Creating a test edge
+edge1 <- new("Edge", source_node = node1, target_node = node2)
+
+# Testing the getters
+source_node(edge1)
+target_node(edge1)
+
+# Testing the setters
+source_node(edge1) <- node3
+target_node(edge1) <- node4
+
+source_node(edge1)
+target_node(edge1)
+```
+
+
+```{r define network}
+check_network <- function(object)
+{
+  errors <- character()
+  
+  for (i in 1:length(object@node_list))
+  {
+    if (class(object@node_list[[i]]) != "Node")
+    {
+      msg <- paste("Network contains an invalid node at index:", i)
+      errors <- c(errors, msg)
+    }
+  }
+  
+  for (i in 1:length(object@edge_list))
+  {
+    if (class(object@edge_list[[i]]) != "Edge")
+    {
+      msg <- paste("Network contains an invalid edge at index: ", i)
+      errors <- c(errors, msg)
+    }
+  }
+  
+  if (length(errors) == 0) TRUE else errors
+}
+
+SimpleNetwork <- setClass("SimpleNetwork",
+                    slots = list(
+                      node_list = "list",
+                      edge_list = "list"
+                    ),
+                    validity = check_network
+                    )
+```
+
+```{r test SimpleNetwork}
+test_network <- new("SimpleNetwork", node_list = list(node1, node2, node3, node4), edge_list = list(edge1))
+
+bad_network <- new("SimpleNetwork", node_list = list(node1, node2, "bad_node", node4), edge_list = list(edge1, "bad_edge"))
+```
+
+
