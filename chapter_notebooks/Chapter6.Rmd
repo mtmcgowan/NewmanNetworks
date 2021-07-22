@@ -2,7 +2,11 @@
 title: "Chapter 6: Mathematics of Networks"
 output: html_notebook
 ---
-
+```{r setup, echo = F}
+source("../classes/Node.R")
+source("../classes/Edge.R")
+source("../classes/SimpleNetwork.R")
+```
 # 6.1: Networks and their representations
 
 This chapter starts with a basic definition of a network or graph as a collection of *nodes*, which are joined together by *edges*.
@@ -23,28 +27,7 @@ API
 
 Since a node is a very simple object, I will only provide code for the definition for now. To start I give a node only one attribute, which is its name.
 ```{r define node}
-# Definition
-Node <- setClass("Node",
-                 representation(
-                     name = "character"
-                     ),
-                 prototype(
-                   name = "default_node_name"
-                   )
-                 )
 
-# Generics
-setGeneric("name", function(x) standardGeneric("name"))
-setGeneric("name<-", function(x, value) standardGeneric("name<-"))
-
-# Getters
-setMethod("name", "Node", function(x) x@name)
-
-# Setters
-setMethod("name<-", "Node", function(x, value) {
-  x@name <- value
-  x
-})
 ```
 
 ```{r test Node}
@@ -62,32 +45,7 @@ name(test_node)
 Next, I define an edge, which has two attributes: a source node, and a target node. Because this item is slightly more complicated, I also define a setter to create a new edge from two provided nodes.
 
 ```{r define edge}
-Edge <- setClass("Edge",
-                 representation(
-                   source_node = "Node",
-                   target_node = "Node"
-                 ))
 
-# Generics
-setGeneric("source_node", function(x) standardGeneric("source_node"))
-setGeneric("source_node<-", function(x, value) standardGeneric("source_node<-"))
-
-setGeneric("target_node", function(x) standardGeneric("target_node"))
-setGeneric("target_node<-", function(x, value) standardGeneric("target_node<-"))
-
-# Getters
-setMethod("source_node", "Edge", function(x) x@source_node)
-setMethod("target_node", "Edge", function(x) x@target_node)
-
-# Setters
-setMethod("source_node<-", "Edge", function(x, value) {
-  x@source_node <- value
-  x
-})
-setMethod("target_node<-", "Edge", function(x, value) {
-  x@target_node <- value
-  x
-})
 ```
 
 ```{r test Edge}
@@ -97,8 +55,10 @@ node2 <- new("Node", name = "node2")
 node3 <- new("Node", name = "node3")
 node4 <- new("Node", name = "node4")
 
-# Creating a test edge
+# Creating some test edges
 edge1 <- new("Edge", source_node = node1, target_node = node2)
+edge2 <- new("Edge", source_node = node2, target_node = node1)
+edge3 <- new("Edge", source_node = node3, target_node = node4)
 
 # Testing the getters
 source_node(edge1)
@@ -110,48 +70,35 @@ target_node(edge1) <- node4
 
 source_node(edge1)
 target_node(edge1)
+
+# Testing equality
+all.equal(edge1, edge1)
+all.equal(edge1, edge2)
+all.equal(edge1, edge3)
 ```
 
 
 ```{r define network}
-check_network <- function(object)
-{
-  errors <- character()
-  
-  for (i in 1:length(object@node_list))
-  {
-    if (class(object@node_list[[i]]) != "Node")
-    {
-      msg <- paste("Network contains an invalid node at index:", i)
-      errors <- c(errors, msg)
-    }
-  }
-  
-  for (i in 1:length(object@edge_list))
-  {
-    if (class(object@edge_list[[i]]) != "Edge")
-    {
-      msg <- paste("Network contains an invalid edge at index: ", i)
-      errors <- c(errors, msg)
-    }
-  }
-  
-  if (length(errors) == 0) TRUE else errors
-}
 
-SimpleNetwork <- setClass("SimpleNetwork",
-                    slots = list(
-                      node_list = "list",
-                      edge_list = "list"
-                    ),
-                    validity = check_network
-                    )
 ```
 
 ```{r test SimpleNetwork}
-test_network <- new("SimpleNetwork", node_list = list(node1, node2, node3, node4), edge_list = list(edge1))
+test_network <- new("SimpleNetwork", node_list = list(node1, node2, node3, node4), edge_list = list(edge1, edge3))
 
+node5 <- new("Node", name = "node5")
+test_network <- add_node(test_network, node5)
+
+# Testing validator function
 bad_network <- new("SimpleNetwork", node_list = list(node1, node2, "bad_node", node4), edge_list = list(edge1, "bad_edge"))
+
+# Testing edge add and delete
+node99 <- new("Node", name = "node99")
+node98 <- new("Node", name = "node98")
+edge99 <- new("Edge", source_node = node99, target_node = node98)
+get_edge_index(test_network, edge99)
+test_network <- add_edge(test_network, edge99)
+
+test_network <- remove_edge(test_network, edge99)
 ```
 
 
